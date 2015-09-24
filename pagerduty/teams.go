@@ -37,13 +37,8 @@ func (s *TeamsService) List(opts *TeamListOptions) ([]Team, *Response, error) {
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	teams := new(teamListWrapper)
-	resp, err := s.client.Do(req, teams)
+	resp, err := s.client.Get(uri, teams)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -61,13 +56,8 @@ type teamWrapper struct {
 func (s *TeamsService) Get(id string) (*Team, *Response, error) {
 	uri := fmt.Sprintf("teams/%s", id)
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	team := new(teamWrapper)
-	resp, err := s.client.Do(req, team)
+	resp, err := s.client.Get(uri, team)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -81,13 +71,8 @@ func (s *TeamsService) Get(id string) (*Team, *Response, error) {
 func (s *TeamsService) Create(team *Team) (*Team, *Response, error) {
 	uri := "teams"
 
-	req, err := s.client.NewRequest(POST, uri, team)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	t := new(Team)
-	resp, err := s.client.Do(req, t)
+	resp, err := s.client.Post(uri, team, t)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -101,13 +86,8 @@ func (s *TeamsService) Create(team *Team) (*Team, *Response, error) {
 func (s *TeamsService) Edit(team *Team) (*Team, *Response, error) {
 	uri := fmt.Sprintf("teams/%s", team.ID)
 
-	req, err := s.client.NewRequest(PUT, uri, team)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	t := new(Team)
-	resp, err := s.client.Do(req, t)
+	resp, err := s.client.Put(uri, team, t)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -119,12 +99,5 @@ func (s *TeamsService) Edit(team *Team) (*Team, *Response, error) {
 //
 // PagerDuty API docs: https://developer.pagerduty.com/documentation/rest/teams/delete
 func (s *TeamsService) Delete(id string) (*Response, error) {
-	uri := fmt.Sprintf("teams/%s", id)
-
-	req, err := s.client.NewRequest(DELETE, uri, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.client.Do(req, nil)
+	return s.client.Delete(fmt.Sprintf("teams/%s", id))
 }

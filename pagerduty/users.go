@@ -55,13 +55,8 @@ func (s *UsersService) List(opts *UserListOptions) ([]User, *Response, error) {
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	users := new(usersListWrapper)
-	resp, err := s.client.Do(req, users)
+	resp, err := s.client.Get(uri, users)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -89,13 +84,8 @@ func (s *UsersService) Get(id string, opts *GetUserOptions) (*User, *Response, e
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	user := new(userWrapper)
-	resp, err := s.client.Do(req, user)
+	resp, err := s.client.Get(uri, user)
 	if err != nil {
 		return nil, resp, err
 	}

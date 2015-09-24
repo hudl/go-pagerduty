@@ -95,13 +95,8 @@ func (s *ServicesService) List(opts *ServiceListOptions) ([]Service, *Response, 
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	services := new(serviceListWrapper)
-	resp, err := s.client.Do(req, services)
+	resp, err := s.client.Get(uri, services)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -125,13 +120,8 @@ func (s *ServicesService) Get(id string, opts *GetServiceOptions) (*Service, *Re
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	service := new(Service)
-	resp, err := s.client.Do(req, service)
+	resp, err := s.client.Get(uri, service)
 	if err != nil {
 		return nil, resp, err
 	}

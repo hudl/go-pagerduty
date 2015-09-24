@@ -57,13 +57,8 @@ func (s *AlertsService) List(opts *AlertListOptions) ([]Alert, *Response, error)
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	alerts := new(alertListWrapper)
-	resp, err := s.client.Do(req, alerts)
+	resp, err := s.client.Get(uri, alerts)
 	if err != nil {
 		return nil, resp, err
 	}

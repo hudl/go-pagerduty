@@ -65,13 +65,13 @@ var _ = Describe("Incidents", func() {
 	AfterEach(func() { env.Server.Close() })
 
 	Describe("List", func() {
-		Context("with a successful, non-empty response", func() {
-			var (
-				incidents []Incident
-				resp      *Response
-				err       error
-			)
+		var (
+			incidents []Incident
+			resp      *Response
+			err       error
+		)
 
+		Context("with a successful, non-empty response", func() {
 			BeforeEach(func() {
 				env.Server.RouteToHandler(GET, "/incidents", ghttp.CombineHandlers(
 					verifyHeaderHandler,
@@ -93,6 +93,10 @@ var _ = Describe("Incidents", func() {
 				Expect(resp).NotTo(BeNil())
 			})
 
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+
 			It("should return the expected incidents", func() {
 				Expect(incidents).NotTo(BeNil())
 				Expect(incidents).NotTo(BeEmpty())
@@ -102,13 +106,13 @@ var _ = Describe("Incidents", func() {
 	})
 
 	Describe("Get", func() {
-		Context("with a successful, non-empty response", func() {
-			var (
-				incident *Incident
-				resp     *Response
-				err      error
-			)
+		var (
+			incident *Incident
+			resp     *Response
+			err      error
+		)
 
+		Context("with a successful, non-empty response", func() {
 			BeforeEach(func() {
 				path, _ := regexp.Compile("/incidents/\\w+")
 				env.Server.RouteToHandler(GET, path, ghttp.CombineHandlers(
@@ -131,9 +135,233 @@ var _ = Describe("Incidents", func() {
 				Expect(resp).NotTo(BeNil())
 			})
 
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+
 			It("should return the expected incident", func() {
 				Expect(incident).NotTo(BeNil())
 				Expect(incident).To(Equal(&expectedIncident))
+			})
+		})
+	})
+
+	Describe("Count", func() {
+		var (
+			count int
+			resp  *Response
+			err   error
+		)
+
+		Context("with a successful, non-empty response", func() {
+			BeforeEach(func() {
+				env.Server.RouteToHandler(GET, "/incidents/count", ghttp.CombineHandlers(
+					verifyHeaderHandler,
+					ghttp.RespondWith(http.StatusOK, `{"total": 1}`),
+				))
+
+				count, resp, err = env.Client.Incidents.Count(nil)
+			})
+
+			It("should have made a request", func() {
+				Expect(env.Server.ReceivedRequests()).To(HaveLen(1))
+			})
+
+			It("should not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a non-empty response", func() {
+				Expect(resp).NotTo(BeNil())
+			})
+
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+
+			It("should return the expected incident count", func() {
+				Expect(count).To(Equal(1))
+			})
+		})
+	})
+
+	Describe("Edit", func() {
+		var (
+			incidents []Incident
+			resp      *Response
+			err       error
+		)
+
+		Context("with a successful, non-empty response", func() {
+			BeforeEach(func() {
+				env.Server.RouteToHandler(PUT, "/incidents", ghttp.CombineHandlers(
+					verifyHeaderHandler,
+					ghttp.RespondWith(http.StatusOK, incidentListJSON),
+				))
+
+				incidents, resp, err = env.Client.Incidents.Edit(nil)
+			})
+
+			It("should have made a request", func() {
+				Expect(env.Server.ReceivedRequests()).To(HaveLen(1))
+			})
+
+			It("should not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a non-empty response", func() {
+				Expect(resp).NotTo(BeNil())
+			})
+
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+
+			It("should return the expected incident count", func() {
+				Expect(incidents).NotTo(BeNil())
+				Expect(incidents).NotTo(BeEmpty())
+				Expect(incidents[0]).To(Equal(expectedIncident))
+			})
+		})
+	})
+
+	Describe("Acknowledge", func() {
+		var (
+			resp *Response
+			err  error
+		)
+
+		Context("with a successful, non-empty response", func() {
+			BeforeEach(func() {
+				path, _ := regexp.Compile("/incidents/\\w+/acknowledge")
+				env.Server.RouteToHandler(PUT, path, ghttp.CombineHandlers(
+					verifyHeaderHandler,
+					ghttp.RespondWith(http.StatusOK, nil),
+				))
+
+				resp, err = env.Client.Incidents.Acknowledge("id", nil)
+			})
+
+			It("should have made a request", func() {
+				Expect(env.Server.ReceivedRequests()).To(HaveLen(1))
+			})
+
+			It("should not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a non-empty response", func() {
+				Expect(resp).NotTo(BeNil())
+			})
+
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+		})
+	})
+
+	Describe("Reassign", func() {
+		var (
+			resp *Response
+			err  error
+		)
+
+		Context("with a successful, non-empty response", func() {
+			BeforeEach(func() {
+				path, _ := regexp.Compile("/incidents/\\w+/reassign")
+				env.Server.RouteToHandler(PUT, path, ghttp.CombineHandlers(
+					verifyHeaderHandler,
+					ghttp.RespondWith(http.StatusOK, nil),
+				))
+
+				resp, err = env.Client.Incidents.Reassign("id", nil)
+			})
+
+			It("should have made a request", func() {
+				Expect(env.Server.ReceivedRequests()).To(HaveLen(1))
+			})
+
+			It("should not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a non-empty response", func() {
+				Expect(resp).NotTo(BeNil())
+			})
+
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+		})
+	})
+
+	Describe("Resolve", func() {
+		var (
+			resp *Response
+			err  error
+		)
+
+		Context("with a successful, non-empty response", func() {
+			BeforeEach(func() {
+				path, _ := regexp.Compile("/incidents/\\w+/resolve")
+				env.Server.RouteToHandler(PUT, path, ghttp.CombineHandlers(
+					verifyHeaderHandler,
+					ghttp.RespondWith(http.StatusOK, nil),
+				))
+
+				resp, err = env.Client.Incidents.Resolve("id", nil)
+			})
+
+			It("should have made a request", func() {
+				Expect(env.Server.ReceivedRequests()).To(HaveLen(1))
+			})
+
+			It("should not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a non-empty response", func() {
+				Expect(resp).NotTo(BeNil())
+			})
+
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+		})
+	})
+
+	Describe("Snooze", func() {
+		var (
+			resp *Response
+			err  error
+		)
+
+		Context("with a successful, non-empty response", func() {
+			BeforeEach(func() {
+				path, _ := regexp.Compile("/incidents/\\w+/snooze")
+				env.Server.RouteToHandler(PUT, path, ghttp.CombineHandlers(
+					verifyHeaderHandler,
+					ghttp.RespondWith(http.StatusOK, nil),
+				))
+
+				resp, err = env.Client.Incidents.Snooze("id", nil)
+			})
+
+			It("should have made a request", func() {
+				Expect(env.Server.ReceivedRequests()).To(HaveLen(1))
+			})
+
+			It("should not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a non-empty response", func() {
+				Expect(resp).NotTo(BeNil())
+			})
+
+			It("should return a response with the correct status code", func() {
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 			})
 		})
 	})

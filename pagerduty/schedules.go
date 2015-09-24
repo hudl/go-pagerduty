@@ -66,13 +66,8 @@ func (s *SchedulesService) List(opts *ScheduleListOptions) ([]Schedule, *Respons
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	schedules := new(scheduleListWrapper)
-	resp, err := s.client.Do(req, schedules)
+	resp, err := s.client.Get(uri, schedules)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -90,13 +85,8 @@ type scheduleWrapper struct {
 func (s *SchedulesService) Get(id string) (*Schedule, *Response, error) {
 	uri := fmt.Sprintf("schedules/%s", id)
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	schedule := new(scheduleWrapper)
-	resp, err := s.client.Do(req, schedule)
+	resp, err := s.client.Get(uri, schedule)
 	if err != nil {
 		return nil, resp, err
 	}

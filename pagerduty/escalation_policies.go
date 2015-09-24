@@ -62,13 +62,8 @@ func (s *EscalationPoliciesService) List(opts *EscalationPolicyListOptions) ([]E
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	policies := new(escalationPolicyListWrapper)
-	resp, err := s.client.Do(req, policies)
+	resp, err := s.client.Get(uri, policies)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -86,13 +81,8 @@ type escalationPolicyWrapper struct {
 func (s *EscalationPoliciesService) Get(id string) (*EscalationPolicy, *Response, error) {
 	uri := fmt.Sprintf("escalation_policies/%s", id)
 
-	req, err := s.client.NewRequest(GET, uri, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	policy := new(escalationPolicyWrapper)
-	resp, err := s.client.Do(req, policy)
+	resp, err := s.client.Get(uri, policy)
 	if err != nil {
 		return nil, resp, err
 	}

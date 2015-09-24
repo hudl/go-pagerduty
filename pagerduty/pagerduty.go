@@ -183,28 +183,71 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 	r := &Response{Response: resp}
 
+	err = CheckResponse(resp)
+	if err != nil {
+		return r, err
+	}
+
 	// save the response body so it can be unmarshalled multiple times
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return r, err
 	}
 
-	err = CheckResponse(resp)
-	if err != nil {
-		return r, err
-	}
+	// body is not empty
+	if len(body) > 0 {
+		// unmarshal pagination response fields
+		err = json.Unmarshal(body, r)
+		if err != nil {
+			return r, err
+		}
 
-	// unmarshal pagination response fields
-	err = json.Unmarshal(body, r)
-	if err != nil {
-		return r, err
-	}
-
-	if v != nil {
-		err = json.Unmarshal(body, v)
+		if v != nil {
+			err = json.Unmarshal(body, v)
+		}
 	}
 
 	return r, err
+}
+
+// Delete is a convenience function to create and execute a DELETE request.
+func (c *Client) Delete(path string) (*Response, error) {
+	req, err := c.NewRequest(DELETE, path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req, nil)
+}
+
+// Get is a convenience function to create and execute a GET request.
+func (c *Client) Get(path string, v interface{}) (*Response, error) {
+	req, err := c.NewRequest(GET, path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req, v)
+}
+
+// Post is a convenience function to create and execute a POST request.
+func (c *Client) Post(path string, body, v interface{}) (*Response, error) {
+	req, err := c.NewRequest(POST, path, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req, v)
+}
+
+// Put is a convenience function to create and execute a PUT request.
+func (c *Client) Put(path string, body, v interface{}) (*Response, error) {
+	req, err := c.NewRequest(PUT, path, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req, v)
 }
 
 // An ErrorResponse reports an error caused by an API request.
