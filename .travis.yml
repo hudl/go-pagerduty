@@ -7,9 +7,10 @@ go:
   - tip
 
 install:
-  - go get -v ./pagerduty
+  - go get -v ./...
   - go get github.com/onsi/ginkgo/ginkgo
   - go get github.com/onsi/gomega
+  - go get github.com/onsi/gomega/ghttp
   - go install github.com/onsi/ginkgo
   - export PATH=$PATH:$HOME/gopath/bin
 
