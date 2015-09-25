@@ -42,7 +42,7 @@ type UserListOptions struct {
 	ListOptions
 }
 
-type usersListWrapper struct {
+type userListWrapper struct {
 	Users []User `json:"users"`
 }
 
@@ -55,7 +55,7 @@ func (s *UsersService) List(opts *UserListOptions) ([]User, *Response, error) {
 		return nil, nil, err
 	}
 
-	users := new(usersListWrapper)
+	users := new(userListWrapper)
 	resp, err := s.client.Get(uri, users)
 	if err != nil {
 		return nil, resp, err

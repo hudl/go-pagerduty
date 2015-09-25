@@ -78,10 +78,10 @@ type TriggerSummary map[string]interface{}
 
 type IncidentListOptions struct {
 	// The start of the date range you want to search.
-	Since *time.Time `url:"since,omitempty"`
+	Since time.Time `url:"since,omitempty"`
 
 	// The end of the date range you want to search.
-	Until *time.Time `url:"until,omitemtpy"`
+	Until time.Time `url:"until,omitemtpy"`
 
 	// When set to 'all', the 'since' and 'until' parameters and defaults are
 	// ignored. Unse this to get all incidents since the account was created.

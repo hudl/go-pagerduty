@@ -93,3 +93,31 @@ func (s *SchedulesService) Get(id string) (*Schedule, *Response, error) {
 
 	return schedule.Schedule, resp, err
 }
+
+type ScheduleUsersOptions struct {
+	// The start of the date range over which you want to return on-call users.
+	Since time.Time `url:"since,omitempty"`
+
+	// The end time of the date range over which you want to return on-call
+	// users.
+	Until time.Time `url:"until,omitempty"`
+}
+
+// Users fetches all the users on-call for a schdule by id.
+//
+// https://developer.pagerduty.com/documentation/rest/schedules/users
+func (s *SchedulesService) Users(id string, opts *ScheduleUsersOptions) ([]User, *Response, error) {
+	path := fmt.Sprintf("schedules/%s/users", id)
+	uri, err := addOptions(path, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	users := new(userListWrapper)
+	resp, err := s.client.Get(uri, users)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return users.Users, resp, err
+}

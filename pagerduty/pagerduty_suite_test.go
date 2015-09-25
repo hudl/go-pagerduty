@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 )
 
 const (
@@ -21,6 +22,11 @@ const (
 
 	// The test api key.
 	apiKey = "super-secret-key"
+)
+
+var (
+	testTime       = new(time.Time).Add(1)
+	testTimeString = testTime.Format(time.RFC3339)
 )
 
 // TestEnvironment is a complete testing environment for mocking the PagerDuty
@@ -68,12 +74,21 @@ var verifyAuthorizationHeaderHandler = ghttp.VerifyHeader(http.Header{
 	"Authorization": []string{"Token token=" + apiKey},
 })
 
-// verifyHeaderHandler is an http.HandlerFunc that checks for the proper
+// verifyHeaderHandler is an http.HandlerFunc that verifies for the proper
 // headers in a request to the PagerDuty API.
 var verifyHeaderHandler = ghttp.CombineHandlers(
 	verifyContentHeaderHandler,
 	verifyAuthorizationHeaderHandler,
 )
+
+// verifyURLQueryHandler is an http.HandlerFunc that verifies that the values
+// of the request URL Query values is equal to provided values.
+func verifyURLQueryHandler(values url.Values) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		Expect(query).To(Equal(values))
+	}
+}
 
 func TestPagerDuty(t *testing.T) {
 	RegisterFailHandler(Fail)
