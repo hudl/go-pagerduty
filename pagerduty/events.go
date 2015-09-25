@@ -15,6 +15,9 @@ const (
 	EventTypeAcknowledge = "acknowledge"
 	EventTypeResolve     = "resolve"
 	EventTypeTrigger     = "trigger"
+
+	EventStatusSuccess = "success"
+	EventStatusError   = "invalid event"
 )
 
 // NewEventRequest creates an API request for the PagerDuty Events API. It has
