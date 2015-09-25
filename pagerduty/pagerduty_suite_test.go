@@ -44,6 +44,7 @@ func NewTestEnvironment() *TestEnvironment {
 	client := NewClient(nil, subdomain, apiKey)
 	url, _ := url.Parse(server.URL())
 	client.BaseURL = url
+	client.EventsURL = url
 
 	return &TestEnvironment{
 		Server: server,
@@ -51,14 +52,27 @@ func NewTestEnvironment() *TestEnvironment {
 	}
 }
 
-// verifyHeaderHandler is an http.HandlerFunc that checks for the proper
-// headers in a request.
-var verifyHeaderHandler = ghttp.CombineHandlers(
+// verifyContentHeaderHandler is an http.HandlerFunc that verifies that a
+// request has the proper values for the 'Accept' and 'Content-Type' headers.
+var verifyContentHeaderHandler = ghttp.CombineHandlers(
 	ghttp.VerifyHeader(http.Header{
-		"Accept":        []string{"application/json"},
-		"Authorization": []string{"Token token=" + apiKey},
+		"Accept": []string{"application/json"},
 	}),
 	ghttp.VerifyContentType("application/json"),
+)
+
+// verifyAuthorizationHeaderHandler is an http.HandlerFunc that verifies that a
+// request has the proper values for the 'Authorization' header, so it can
+// authenticate with the PagerDuty API.
+var verifyAuthorizationHeaderHandler = ghttp.VerifyHeader(http.Header{
+	"Authorization": []string{"Token token=" + apiKey},
+})
+
+// verifyHeaderHandler is an http.HandlerFunc that checks for the proper
+// headers in a request to the PagerDuty API.
+var verifyHeaderHandler = ghttp.CombineHandlers(
+	verifyContentHeaderHandler,
+	verifyAuthorizationHeaderHandler,
 )
 
 func TestPagerDuty(t *testing.T) {

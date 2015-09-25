@@ -34,11 +34,13 @@ var _ = Describe("PagerDuty", func() {
 			It("should register all services correctly", func() {
 				Expect(client.Alerts).NotTo(BeNil())
 				Expect(client.EscalationPolicies).NotTo(BeNil())
+				Expect(client.Events).NotTo(BeNil())
 				Expect(client.Incidents).NotTo(BeNil())
 				Expect(client.Schedules).NotTo(BeNil())
 				Expect(client.Services).NotTo(BeNil())
 				Expect(client.Teams).NotTo(BeNil())
 				Expect(client.Users).NotTo(BeNil())
+				Expect(client.Webhooks).NotTo(BeNil())
 			})
 		})
 	})

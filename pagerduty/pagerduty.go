@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://%s.pagerduty.com/api/v1/"
+	defaultBaseURL   = "https://%s.pagerduty.com/api/v1/"
+	defaultEventsURL = "https://events.pagerduty.com/"
 
 	headerAuthorization = "Authorization"
 	headerAccept        = "Accept"
@@ -42,8 +43,11 @@ type Client struct {
 	// HTTP client used to communicate with the API.
 	client *http.Client
 
-	// BaseURL for the PagerDuty API.
+	// Base URL for the PagerDuty API.
 	BaseURL *url.URL
+
+	// Base URL for the PagerDuty Events API.
+	EventsURL *url.URL
 
 	// Client subdomain for the PagerDuty API.
 	subdomain string
@@ -54,37 +58,46 @@ type Client struct {
 	// Services used for talking to different parts of the PagerDuty API.
 	Alerts             *AlertsService
 	EscalationPolicies *EscalationPoliciesService
+	Events             *EventsService
 	Incidents          *IncidentsService
 	Schedules          *SchedulesService
 	Services           *ServicesService
 	Teams              *TeamsService
 	Users              *UsersService
+	Webhooks           *WebhooksService
 }
 
 // NewClient returns a new PagerDuty API client. If httpClient is nil,
 // http.DefaultClient will be used.
-func NewClient(httpClient *http.Client, subdomain, apiKey string) *Client {
+func NewClient(httpClient *http.Client, subdomain string, apiKey ...string) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 
 	renderedURL := fmt.Sprintf(defaultBaseURL, subdomain)
 	baseURL, _ := url.Parse(renderedURL)
+	eventsURL, _ := url.Parse(defaultEventsURL)
 	c := &Client{
 		client:    httpClient,
 		BaseURL:   baseURL,
+		EventsURL: eventsURL,
 		subdomain: subdomain,
-		APIKey:    apiKey,
+	}
+
+	if len(apiKey) == 1 {
+		c.APIKey = apiKey[0]
 	}
 
 	// configure services
 	c.Alerts = &AlertsService{client: c}
 	c.EscalationPolicies = &EscalationPoliciesService{client: c}
+	c.Events = &EventsService{client: c}
 	c.Incidents = &IncidentsService{client: c}
 	c.Schedules = &SchedulesService{client: c}
 	c.Services = &ServicesService{client: c}
 	c.Teams = &TeamsService{client: c}
 	c.Users = &UsersService{client: c}
+	c.Webhooks = &WebhooksService{client: c}
 
 	return c
 }
@@ -122,18 +135,15 @@ func addOptions(s string, opt interface{}) (string, error) {
 	return u.String(), nil
 }
 
-// NewRequest creates an API request. A relative URL can be provided in path,
-// in which case it is resolved relative to the BaseURL of the client.
-// Relative URLs should always be specified without the preceding slash. If
-// specified, the value pointed to by body is JSON encoded and included as the
-// request body
-func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
+// newRequest is a helper function to generate an http.Request and automagically
+// json encode a body and resolve the given path.
+func newRequest(baseURL *url.URL, method, path string, body interface{}) (*http.Request, error) {
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, err
 	}
 
-	u := c.BaseURL.ResolveReference(rel)
+	uri := baseURL.ResolveReference(rel)
 
 	var buf io.ReadWriter
 	if body != nil {
@@ -144,14 +154,29 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 		}
 	}
 
-	req, err := http.NewRequest(method, u.String(), buf)
+	req, err := http.NewRequest(method, uri.String(), buf)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add(headerAccept, acceptType)
+	req.Header.Add(headerContentType, contentType)
+
+	return req, nil
+}
+
+// NewRequest creates an API request. A relative URL can be provided in path,
+// in which case it is resolved relative to the BaseURL of the client.
+// Relative URLs should always be specified without the preceding slash. If
+// specified, the value pointed to by body is JSON encoded and included as the
+// request body
+func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
+	req, err := newRequest(c.BaseURL, method, path, body)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Add(headerAuthorization, fmt.Sprintf(authorizationToken, c.APIKey))
-	req.Header.Add(headerAccept, acceptType)
-	req.Header.Add(headerContentType, contentType)
 
 	return req, nil
 }
@@ -179,16 +204,12 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
-
 	r := &Response{Response: resp}
 
-	err = CheckResponse(resp)
-	if err != nil {
-		return r, err
-	}
+	errResp := CheckResponse(resp)
 
 	// save the response body so it can be unmarshalled multiple times
+	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return r, err
@@ -204,10 +225,13 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 		if v != nil {
 			err = json.Unmarshal(body, v)
+			if err != nil {
+				return r, err
+			}
 		}
 	}
 
-	return r, err
+	return r, errResp
 }
 
 // Delete is a convenience function to create and execute a DELETE request.

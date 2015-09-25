@@ -16,7 +16,7 @@ const (
 )
 
 // IncidentsService handles communication with the Incidents related methods of
-// the PagerDuty APIl.
+// the PagerDuty API.
 type IncidentsService struct {
 	client *Client
 }
@@ -39,6 +39,10 @@ type Incident struct {
 	LastStatusChangeOn *time.Time        `json:"last_status_chage_on,omitempty"`
 	TriggerSummary     *TriggerSummary   `json:"trigger_summary_data,omitempty"`
 	TriggerDetailsURL  *string           `json:"trigger_details_html_url,omitempty"`
+
+	// NOTE: Depricated field, used for the Events API. The fielf will only
+	// contain the first assigned user.
+	AssignedToUser *User `json:"assigned_to_user,omitempty"`
 
 	// TODO: add support for returned errors
 	// Error *ErrorResponse `json:"error,omitempty"`
