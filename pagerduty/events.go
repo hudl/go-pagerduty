@@ -61,13 +61,13 @@ type EventsService struct {
 }
 
 type Event struct {
-	Type        *string                `json:"event_type,omitempty"`
-	ServiceKey  *string                `json:"service_key,omitempty"`
-	Description *string                `json:"description,omitempty"`
-	IncidentKey *string                `json:"incident_key,omitempty"`
-	Client      *string                `json:"client,omitempty"`
-	ClientURL   *string                `json:"client_url,omitempty"`
-	Details     map[string]interface{} `json:"details,omitempty"`
+	Type        *string     `json:"event_type,omitempty"`
+	ServiceKey  *string     `json:"service_key,omitempty"`
+	Description *string     `json:"description,omitempty"`
+	IncidentKey *string     `json:"incident_key,omitempty"`
+	Client      *string     `json:"client,omitempty"`
+	ClientURL   *string     `json:"client_url,omitempty"`
+	Details     interface{} `json:"details,omitempty"`
 
 	// NOTE: Contexts should contain only LinkContext or ImageContext structs.
 	Contexts []interface{} `json:"contexts,omitempty"`
