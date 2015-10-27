@@ -8,7 +8,7 @@ import (
 
 const (
 	StatusTriggered    = "triggered"
-	StatusAcknowledged = "acknoledged"
+	StatusAcknowledged = "acknowledged"
 	StatusResolved     = "resolved"
 
 	ObjectTypeUser = "user"
