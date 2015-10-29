@@ -36,12 +36,23 @@ const (
 						"email": "alan@pagerduty.com",
 						"html_url": "https://acme.pagerduty.com/users/PPI9KUT"
 					},
+					"resolved_by_user": {
+						"id": "PPI9KUT",
+						"name": "Alan Kay",
+						"email": "alan@pagerduty.com",
+						"html_url": "https://acme.pagerduty.com/users/PPI9KUT"
+					},
 					"trigger_summary_data": {
-					"subject": "45645"
+						"subject": "45645"
 					},
 					"trigger_details_html_url": "https://acme.pagerduty.com/incidents/PIJ90N7/log_entries/PIJ90N7",
 					"last_status_change_on": "2013-07-09T20:25:44Z",
-					"last_status_change_by": "null"
+					"last_status_change_by": {
+						"id": "PPI9KUT",
+						"name": "Alan Kay",
+						"email": "alan@pagerduty.com",
+						"html_url": "https://acme.pagerduty.com/users/PPI9KUT"
+					}
 				}
 			}
 		}]
